@@ -2,14 +2,17 @@
 
 export function parse(accept) {
 	const acceptList = accept.split(',').map((acceptItem) => {
-		const [, ...parameters] = acceptItem.split(';');
+		const acceptItemParts = acceptItem.split(';').map((value) => {
+			return value.trim();
+		});
+		const [, ...parameters] = acceptItemParts;
 		for (const parameter of parameters) {
 			const [name, value] = parameter.split('=');
 			if (name.trim() === 'q') {
-				return [acceptItem.trim(), +value];
+				return [[acceptItem, ...acceptItemParts], +value];
 			}
 		}
-		return [acceptItem.trim(), 1];
+		return [[acceptItem, ...acceptItemParts], 1];
 	})
 
 	acceptList.sort(([, qA], [, qB]) => {
@@ -22,8 +25,8 @@ export function parse(accept) {
 		return 0;
 	});
 
-	return acceptList.map(([acceptItem]) => {
-		return acceptItem;
+	return acceptList.map(([value]) => {
+		return value;
 	});
 }
 
@@ -33,34 +36,28 @@ export function match(acceptList, evaluate, defaultAcceptItem) {
 	}
 
 	if (Array.isArray(evaluate)) {
-		evaluate = ((acceptItems) => (acceptItem) => {
-			const [value] = acceptItem.split(';');
-			const index = acceptItems.indexOf(value.trim());
-			if (index != -1) {
-				return index;
-			}
+		evaluate = ((validValues) => ([, value]) => {
+			return validValues.includes(value);
 		})(evaluate);
 	}
 
 	if (typeof evaluate === 'object' && Object.getPrototypeOf(evaluate) === Object.getPrototypeOf({})) {
-		evaluate = ((dictionary) => (acceptItem) => {
-			const [value] = acceptItem.split(';');
-			return dictionary[value.trim()];
+		evaluate = ((dictionary) => ([, value]) => {
+			return dictionary[value];
 		})(evaluate);
 	}
 
 	if (evaluate instanceof RegExp) {
-		evaluate = ((regex) => (acceptItem) => {
-			const [value] = acceptItem.split(';');
+		evaluate = ((regex) => ([, value]) => {
 			return regex.exec(value);
 		})(evaluate);
 	}
 
-	for (const acceptItem of acceptList) {
-		const result = evaluate(acceptItem);
-		if (result || result === 0) {
-			return [acceptItem, result];
+	for (const acceptItemParts of acceptList) {
+		if (evaluate(acceptItemParts)) {
+			return acceptItemParts;
 		}
 	}
+
 	return [defaultAcceptItem];
 }
