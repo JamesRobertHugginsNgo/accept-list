@@ -36,20 +36,26 @@ export function match(acceptList, evaluate, defaultAcceptItem) {
 	}
 
 	if (Array.isArray(evaluate)) {
-		evaluate = ((validValues) => ([, value]) => {
-			return validValues.includes(value);
+		evaluate = ((validValues) => {
+			return ([, value]) => {
+				return validValues.includes(value);
+			};
 		})(evaluate);
 	}
 
 	if (typeof evaluate === 'object' && Object.getPrototypeOf(evaluate) === Object.getPrototypeOf({})) {
-		evaluate = ((dictionary) => ([, value]) => {
-			return dictionary[value];
+		evaluate = ((dictionary) => {
+			return ([, value]) => {
+				return dictionary[value];
+			}
 		})(evaluate);
 	}
 
 	if (evaluate instanceof RegExp) {
-		evaluate = ((regex) => ([, value]) => {
-			return regex.exec(value);
+		evaluate = ((regex) => {
+			return ([, value]) => {
+				return regex.exec(value);
+			}
 		})(evaluate);
 	}
 
