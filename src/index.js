@@ -9,10 +9,10 @@ export function parse(accept) {
 		for (const parameter of parameters) {
 			const [name, value] = parameter.split('=');
 			if (name.trim() === 'q') {
-				return [[acceptItem, ...acceptItemParts], +value];
+				return [[acceptItem.trim(), ...acceptItemParts], +value];
 			}
 		}
-		return [[acceptItem, ...acceptItemParts], 1];
+		return [[acceptItem.trim(), ...acceptItemParts], 1];
 	})
 
 	acceptList.sort(([, qA], [, qB]) => {
