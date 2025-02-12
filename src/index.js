@@ -65,5 +65,5 @@ export function match(acceptList, evaluate, defaultAcceptItem) {
 		}
 	}
 
-	return [defaultAcceptItem];
+	return [defaultAcceptItem, defaultAcceptItem];
 }
