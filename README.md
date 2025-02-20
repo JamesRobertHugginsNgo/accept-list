@@ -4,6 +4,8 @@
 [![Static Badge](https://img.shields.io/badge/GitHub%20Page-4078c0)](https://jamesroberthugginsngo.github.io/accept-list/)
 [![Static Badge](https://img.shields.io/badge/Latest_Tag-2.0.1-6cc644)](https://github.com/JamesRobertHugginsNgo/accept-list/tree/2.0.1)
 
+JavaScript function for parsing accept headers.
+
 ## Boilerplate
 
 [index.js](./src/index.js)
