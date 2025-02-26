@@ -17,12 +17,9 @@
 
 	<script type="module">
 		import * as AcceptList from '../dist/accept-list.js';
+		import createDisplay from './create-display.js';
 
-		const mainEl = document.querySelector('main');
-		function display(title, description, code) {
-			const result = code();
-			mainEl.insertAdjacentHTML('beforeend', `<h2>${title}</h2><p>${description}</p><h3>Code</h3><pre><code>${code.toString().replace(/\s+/g, ' ').trim()}</code></pre><h3>Return Value</h3><pre><code>${typeof result === 'object' ? JSON.stringify(result, null, '\t') : result}</code></pre>`);
-		}
+		const display = createDisplay(document.querySelector('main'));
 
 		let accept;
 		display(
