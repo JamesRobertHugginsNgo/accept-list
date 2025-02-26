@@ -9,9 +9,29 @@
     "email": "jamesroberthugginsngo@gmail.com",
     "url": "https://jamesroberthugginsngo.github.io"
   },
+  "homepage": "https://github.com/JamesRobertHugginsNgo/accept-list#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesRobertHugginsNgo/accept-list.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JamesRobertHugginsNgo/accept-list/issues"
+  },
   "type": "module",
-  "main": "./src/index.js",
+  "main": "./src/accept-list.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/accept-list.d.ts",
+      "default": "./dist/accept-list.js"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc ./src/*.ts --outDir ./dist --declaration --moduleResolution Node --target es6 && npx prettier --write ./dist/*.[jt]s"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
   }
 }

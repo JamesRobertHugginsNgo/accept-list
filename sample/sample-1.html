@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>accept-list Sample</title>
+	<link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+	<main class="page-width">
+		<h1>accept-list Sample</h1>
+
+		<p>The following content is dynamically generated which can be viewed in the web page's source code.</p>
+	</main>
+
+	<script type="module">
+		import * as AcceptList from '../dist/accept-list.js';
+
+		const mainEl = document.querySelector('main');
+		function display(title, description, code) {
+			const result = code();
+			mainEl.insertAdjacentHTML('beforeend', `<h2>${title}</h2><p>${description}</p><h3>Code</h3><pre><code>${code.toString().replace(/\s+/g, ' ').trim()}</code></pre><h3>Return Value</h3><pre><code>${typeof result === 'object' ? JSON.stringify(result, null, '\t') : result}</code></pre>`);
+		}
+
+		let accept;
+		display(
+			'Define accept',
+			'Set a value for <strong>accept</strong> variable.',
+			() => {
+				return accept = 'application/json; charset=utf-8; q=0.8,text/html; q=1, application/xhtml+xml, application/xml; q=0.9, image/webp, */*; q=0.8';
+			}
+		);
+
+		display(
+			'Parse',
+			'Parse <strong>accept</strong> variable. The result is an array of a tupple value containing the full string, the string value without its parameters, followed by a list of parameters in <strong>accept</strong>. The array is sorted by the <strong>q</strong> parameter value.',
+			() => {
+				return AcceptList.parse(accept);
+			}
+		);
+
+		display(
+			'Match Against an Object',
+			'Match <strong>accept</strong> against an object\'s keys returning the first match.',
+			() => {
+				return AcceptList.match(accept, { 'text/plain': 'first', 'text/html': 'second' }, ['*/*', '*/*']);
+			}
+		);
+
+		display(
+			'Match Against an Array',
+			'Match <strong>accept</strong> against array elements returning the first match.',
+			() => {
+				return AcceptList.match(accept, ['text/plain', 'application/xhtml+xml'], ['*/*', '*/*']);
+			}
+		);
+
+		display(
+			'Match Against RegExp',
+			'Match <strong>accept</strong> against a regular expression returning the first match.',
+			() => {
+				return AcceptList.match(accept, /^image\/webp$/, ['*/*', '*/*']);
+			}
+		);
+
+		display(
+			'Match With Function',
+			'Match <strong>accept</strong> using a function returning a boolean value returning the first match.',
+			() => {
+				return AcceptList.match(accept, (acceptListItem) => { return acceptListItem[1] === '*/*'; }, ['*/*', '*/*']);
+			}
+		);
+
+		display(
+			'No Match With Function',
+			'Use a function that doesnt match any items returning the default value (last argument).',
+			() => {
+				return AcceptList.match(accept, () => { return false; }, ['*/*', '*/*']);
+			}
+		);
+	</script>
+</body>
+
+</html>
