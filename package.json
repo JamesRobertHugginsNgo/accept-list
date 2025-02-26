@@ -27,10 +27,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc ./src/*.ts --outDir ./dist --declaration --moduleResolution Node --target es6 && npx prettier --write ./dist/*.[jt]s"
+    "build": "tsc ./src/*.ts --outDir ./dist --declaration --lib ESNext --target es6 && npx prettier --write ./dist/*.[jt]s"
   },
   "devDependencies": {
-    "@types/node": "^22.13.4",
     "prettier": "^3.5.1",
     "typescript": "^5.7.3"
   }
