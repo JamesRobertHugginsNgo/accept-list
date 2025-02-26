@@ -1,7 +1,7 @@
 {
   "name": "accept-list",
   "version": "3.0.0",
-  "description": "JavaScript function for parsing accept headers.",
+  "description": "TypeScript/JavaScript function for parsing accept headers.",
   "keywords": [],
   "license": "MIT",
   "author": {
