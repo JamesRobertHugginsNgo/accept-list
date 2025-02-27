@@ -17,36 +17,37 @@
 
 	<script type="module">
 		import * as AcceptList from '../dist/accept-list.js';
-		import createDisplay from './create-display.js';
+		import CodeDisplay from './code-display.js';
 
-		const display = createDisplay(document.querySelector('main'));
+		const codeDisplay = new CodeDisplay(document.querySelector('main'));
 
-		let accept;
-		display(
+		const accept = codeDisplay.insert(
 			'Define accept',
 			'Set a value for <strong>accept</strong> variable.',
 			() => {
-				return accept = 'application/json; charset=utf-8; q=0.8,text/html; q=1, application/xhtml+xml, application/xml; q=0.9, image/webp, */*; q=0.8';
+				return 'application/json; charset=utf-8; q=0.8,text/html; q=1, application/xhtml+xml, application/xml; q=0.9, image/webp, */*; q=0.8';
 			}
 		);
 
-		display(
+		codeDisplay.insert(
 			'Parse',
 			'Parse <strong>accept</strong> variable. The result is an array of a tupple value containing the full string, the string value without its parameters, followed by a list of parameters in <strong>accept</strong>. The array is sorted by the <strong>q</strong> parameter value.',
-			() => {
+			(accept) => {
 				return AcceptList.parse(accept);
-			}
+			},
+			accept
 		);
 
-		display(
+		codeDisplay.insert(
 			'Match Against an Object',
 			'Match <strong>accept</strong> against an object\'s keys returning the first match.',
-			() => {
+			(accept) => {
 				return AcceptList.match(accept, { 'text/plain': 'first', 'text/html': 'second' }, ['*/*', '*/*']);
-			}
+			},
+			accept
 		);
 
-		display(
+		codeDisplay.insert(
 			'Match Against an Array',
 			'Match <strong>accept</strong> against array elements returning the first match.',
 			() => {
@@ -54,7 +55,7 @@
 			}
 		);
 
-		display(
+		codeDisplay.insert(
 			'Match Against RegExp',
 			'Match <strong>accept</strong> against a regular expression returning the first match.',
 			() => {
@@ -62,20 +63,22 @@
 			}
 		);
 
-		display(
+		codeDisplay.insert(
 			'Match With Function',
 			'Match <strong>accept</strong> using a function returning a boolean value returning the first match.',
-			() => {
+			(accept) => {
 				return AcceptList.match(accept, (acceptListItem) => { return acceptListItem[1] === '*/*'; }, ['*/*', '*/*']);
-			}
+			},
+			accept
 		);
 
-		display(
+		codeDisplay.insert(
 			'No Match With Function',
 			'Use a function that doesnt match any items returning the default value (last argument).',
-			() => {
+			(accept) => {
 				return AcceptList.match(accept, () => { return false; }, ['*/*', '*/*']);
-			}
+			},
+			accept
 		);
 	</script>
 </body>
