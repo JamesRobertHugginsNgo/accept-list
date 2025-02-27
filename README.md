@@ -11,7 +11,7 @@ TypeScript/JavaScript function for parsing accept headers.
 Use the raw link to quickly download the raw source code.
 
 - [accept-list.ts](./src/accept-list.ts) \| [raw](./src/accept-list.ts?raw=1)
-- [accept-list.js](./src/accept-list.js) \| [raw](./src/accept-list.js?raw=1)
+- [accept-list.js](./dist/accept-list.js) \| [raw](./dist/accept-list.js?raw=1)
 
 ## Samples
 
