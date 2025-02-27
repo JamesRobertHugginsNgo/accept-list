@@ -1,78 +1,87 @@
-type ParseResultItemType = [string, string, ...string[]];
+type AcceptSetItem = [string, string, ...string[]];
+type AcceptSortableSetItem = [AcceptSetItem, number];
 
-export function parse(accept: string): ParseResultItemType[] {
-	const acceptList: [ParseResultItemType, number][] = accept.split(',').map((acceptItem) => {
-		const [value, ...parameters] = acceptItem.split(';').map((value) => {
-			return value.trim();
+export function parse(accept: string): AcceptSetItem[] {
+	const acceptList: string[] = accept.split(',')
+		.map((item: string): string => {
+			return item.trim();
 		});
 
-		for (const parameter of parameters) {
-			const [name, parameterValue] = parameter.split('=');
-			if (name.trim() === 'q') {
-				return [[acceptItem.trim(), value, ...parameters], +parameterValue];
+	const sortableAcceptSet: AcceptSortableSetItem[] = acceptList
+		.map((item: string): AcceptSortableSetItem => {
+			item = item.trim();
+			const [value, ...parameters]: string[] = item.split(';')
+				.map((part: string): string => {
+					return part.trim();
+				});
+
+			for (const parameter of parameters) {
+				const [name, parameterValue]: string[] = parameter.split('=');
+				if (name === 'q') {
+					return [[item, value, ...parameters], +parameterValue];
+				}
 			}
-		}
 
-		return [[acceptItem.trim(), value, ...parameters], 1];
-	})
+			return [[item, value, ...parameters], 1];
+		});
 
-	acceptList.sort(([, qA], [, qB]) => {
-		if (qA < qB) {
-			return 1;
-		}
-		if (qA > qB) {
-			return -1;
-		}
-		return 0;
+	sortableAcceptSet.sort((
+		sortableAcceptItemA: AcceptSortableSetItem,
+		sortableAcceptItemB: AcceptSortableSetItem
+	): number => {
+		const [, qA]: AcceptSortableSetItem = sortableAcceptItemA;
+		const [, qB]: AcceptSortableSetItem = sortableAcceptItemB;
+		return qA < qB ? 1 : qA > qB ? -1 : 0;
 	});
 
-	return acceptList.map(([value]) => {
-		return value;
-	});
+	return sortableAcceptSet
+		.map((sortableAcceptItem: AcceptSortableSetItem): AcceptSetItem => {
+			const [[mainValue, ...parameters]]: AcceptSortableSetItem = sortableAcceptItem;
+			return [mainValue, ...parameters];
+		});
 }
 
-type EvaluateType = (value: ParseResultItemType) => undefined | boolean;
+type AcceptEvaluateType = (acceptSetItem: AcceptSetItem) => boolean;
 
 export function match(
-	acceptList: string | ParseResultItemType[],
-	evaluate: string[] | object | RegExp | EvaluateType,
-	defaultAcceptItem: ParseResultItemType = ['*', '*']
-): ParseResultItemType {
-	if (typeof acceptList === 'string') {
-		acceptList = parse(acceptList);
-	}
-
-	if (Array.isArray(evaluate)) {
-		evaluate = ((validValues: string[]) => {
-			return ([, value]) => {
-				return validValues.includes(value);
-			};
-		})(evaluate);
-	}
-
-	if (typeof evaluate === 'object' && Object.getPrototypeOf(evaluate) === Object.getPrototypeOf({})) {
-		evaluate = ((dictionary: object) => {
-			return ([, value]) => {
-				return dictionary[value];
-			}
-		})(evaluate);
+	acceptSet: string | AcceptSetItem[],
+	evaluate: string[] | { [key: string]: any } | RegExp | AcceptEvaluateType,
+	defaultAcceptSet: AcceptSetItem = ['*', '*']
+): AcceptSetItem {
+	if (typeof acceptSet === 'string') {
+		acceptSet = parse(acceptSet);
 	}
 
 	if (evaluate instanceof RegExp) {
 		evaluate = ((regex: RegExp) => {
-			return ([, value]) => {
-				return regex.exec(value);
-			}
+			return (acceptSetItem: AcceptSetItem): boolean => {
+				const [, value]: AcceptSetItem = acceptSetItem;
+				return regex.test(value);
+			};
+		})(evaluate);
+	} else if (Array.isArray(evaluate)) {
+		evaluate = ((values: string[]): AcceptEvaluateType => {
+			return (acceptSetItem: AcceptSetItem): boolean => {
+				const [, value]: AcceptSetItem = acceptSetItem;
+				return values.includes(value);
+			};
+		})(evaluate);
+	} else if (typeof evaluate === 'object') {
+		evaluate = ((values: { [key: string]: any }): AcceptEvaluateType => {
+			return (acceptSetItem: AcceptSetItem): boolean => {
+				const [, value]: AcceptSetItem = acceptSetItem;
+				return Boolean(values[value]);
+			};
 		})(evaluate);
 	}
 
 	if (typeof evaluate === 'function') {
-		for (const acceptItemParts of acceptList) {
-			if (evaluate(acceptItemParts)) {
-				return acceptItemParts;
+		for (const acceptSetItem of acceptSet) {
+			if (evaluate(acceptSetItem)) {
+				return acceptSetItem;
 			}
 		}
 	}
 
-	return defaultAcceptItem;
+	return defaultAcceptSet;
 }

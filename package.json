@@ -27,7 +27,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc ./src/*.ts --outDir ./dist --declaration --lib ESNext --target es6 && npx prettier --write ./dist/*.[jt]s"
+    "build": "tsc && npx prettier --write ./dist/*.[jt]s"
   },
   "devDependencies": {
     "prettier": "^3.5.1",

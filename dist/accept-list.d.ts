@@ -1,9 +1,15 @@
-type ParseResultItemType = [string, string, ...string[]];
-export declare function parse(accept: string): ParseResultItemType[];
-type EvaluateType = (value: ParseResultItemType) => undefined | boolean;
+type AcceptSetItem = [string, string, ...string[]];
+export declare function parse(accept: string): AcceptSetItem[];
+type AcceptEvaluateType = (acceptSetItem: AcceptSetItem) => boolean;
 export declare function match(
-	acceptList: string | ParseResultItemType[],
-	evaluate: string[] | object | RegExp | EvaluateType,
-	defaultAcceptItem?: ParseResultItemType,
-): ParseResultItemType;
+	acceptSet: string | AcceptSetItem[],
+	evaluate:
+		| string[]
+		| {
+				[key: string]: any;
+		  }
+		| RegExp
+		| AcceptEvaluateType,
+	defaultAcceptSet?: AcceptSetItem,
+): AcceptSetItem;
 export {};

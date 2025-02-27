@@ -1,66 +1,62 @@
 export function parse(accept) {
-	const acceptList = accept.split(",").map((acceptItem) => {
-		const [value, ...parameters] = acceptItem.split(";").map((value) => {
-			return value.trim();
+	const acceptList = accept.split(",").map((item) => {
+		return item.trim();
+	});
+	const sortableAcceptSet = acceptList.map((item) => {
+		item = item.trim();
+		const [value, ...parameters] = item.split(";").map((part) => {
+			return part.trim();
 		});
 		for (const parameter of parameters) {
 			const [name, parameterValue] = parameter.split("=");
-			if (name.trim() === "q") {
-				return [
-					[acceptItem.trim(), value, ...parameters],
-					+parameterValue,
-				];
+			if (name === "q") {
+				return [[item, value, ...parameters], +parameterValue];
 			}
 		}
-		return [[acceptItem.trim(), value, ...parameters], 1];
+		return [[item, value, ...parameters], 1];
 	});
-	acceptList.sort(([, qA], [, qB]) => {
-		if (qA < qB) {
-			return 1;
-		}
-		if (qA > qB) {
-			return -1;
-		}
-		return 0;
+	sortableAcceptSet.sort((sortableAcceptItemA, sortableAcceptItemB) => {
+		const [, qA] = sortableAcceptItemA;
+		const [, qB] = sortableAcceptItemB;
+		return qA < qB ? 1 : qA > qB ? -1 : 0;
 	});
-	return acceptList.map(([value]) => {
-		return value;
+	return sortableAcceptSet.map((sortableAcceptItem) => {
+		const [[mainValue, ...parameters]] = sortableAcceptItem;
+		return [mainValue, ...parameters];
 	});
 }
-export function match(acceptList, evaluate, defaultAcceptItem = ["*", "*"]) {
-	if (typeof acceptList === "string") {
-		acceptList = parse(acceptList);
-	}
-	if (Array.isArray(evaluate)) {
-		evaluate = ((validValues) => {
-			return ([, value]) => {
-				return validValues.includes(value);
-			};
-		})(evaluate);
-	}
-	if (
-		typeof evaluate === "object" &&
-		Object.getPrototypeOf(evaluate) === Object.getPrototypeOf({})
-	) {
-		evaluate = ((dictionary) => {
-			return ([, value]) => {
-				return dictionary[value];
-			};
-		})(evaluate);
+export function match(acceptSet, evaluate, defaultAcceptSet = ["*", "*"]) {
+	if (typeof acceptSet === "string") {
+		acceptSet = parse(acceptSet);
 	}
 	if (evaluate instanceof RegExp) {
 		evaluate = ((regex) => {
-			return ([, value]) => {
-				return regex.exec(value);
+			return (acceptSetItem) => {
+				const [, value] = acceptSetItem;
+				return regex.test(value);
+			};
+		})(evaluate);
+	} else if (Array.isArray(evaluate)) {
+		evaluate = ((values) => {
+			return (acceptSetItem) => {
+				const [, value] = acceptSetItem;
+				return values.includes(value);
+			};
+		})(evaluate);
+	} else if (typeof evaluate === "object") {
+		evaluate = ((values) => {
+			return (acceptSetItem) => {
+				const [, value] = acceptSetItem;
+				return Boolean(values[value]);
 			};
 		})(evaluate);
 	}
 	if (typeof evaluate === "function") {
-		for (const acceptItemParts of acceptList) {
-			if (evaluate(acceptItemParts)) {
-				return acceptItemParts;
+		for (const acceptSetItem of acceptSet) {
+			if (evaluate(acceptSetItem)) {
+				return acceptSetItem;
 			}
 		}
 	}
-	return defaultAcceptItem;
+	return defaultAcceptSet;
 }
